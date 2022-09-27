@@ -34,45 +34,47 @@ averaging="mean"
 count=0
 # dtw ddtw erp edr wdtw lcss twe msm dwdtw euclidean
 while read dataset; do
-  for distance in euclidean
-  do
-    numPending=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "PD ${queue}" | wc -l)
-    numRunning=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "R ${queue}" | wc -l)
-      while [ "$((numPending+numRunning))" -ge "${maxNumSubmitted}" ] do
-        echo Waiting 60s, $((numPending+numRunning)) currently submitted on ${queue}, user-defined max is ${maxNumSubmitted}
-        sleep 60
-        numPending=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "PD ${queue}" | wc -l)
-        numRunning=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "R ${queue}" | wc -l)
-      done
-    ((count++))
+for distance in euclidean
+do
+numPending=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "PD ${queue}" | wc -l)
+numRunning=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "R ${queue}" | wc -l)
+while [ "$((numPending+numRunning))" -ge "${maxNumSubmitted}" ]
+do
+    echo Waiting 30s, $((numPending+numRunning)) currently submitted on ${queue}, user-defined max is ${maxNumSubmitted}
+	sleep 30
+	numPending=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "PD ${queue}" | wc -l)
+	numRunning=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "R ${queue}" | wc -l)
+done
 
-    if ((count>=start_point)); then
+((count++))
 
-      mkdir -p ${out_dir}${clusterer}/${dataset}/
-      echo "#!/bin/bash
-      #SBATCH --mail-type=${mail}
-      #SBATCH --mail-user=${mailto}
-      #SBATCH -p ${queue}
-      #SBATCH -t ${max_time}
-      #SBATCH --job-name=${clusterer}${dataset}
-      #SBATCH --array=${start_fold}-${max_folds}
-      #SBATCH --mem=${max_memory}M
-      #SBATCH -o ${out_dir}${clusterer}/${dataset}/%A-%a.out
-      #SBATCH -e ${out_dir}${clusterer}/${dataset}/%A-%a.err
+if ((count>=start_point)); then
 
-      . /etc/profile
+  mkdir -p ${out_dir}${clusterer}/${dataset}/
+  echo "#!/bin/bash
+  #SBATCH --mail-type=${mail}
+  #SBATCH --mail-user=${mailto}
+  #SBATCH -p ${queue}
+  #SBATCH -t ${max_time}
+  #SBATCH --job-name=${clusterer}${dataset}
+  #SBATCH --array=${start_fold}-${max_folds}
+  #SBATCH --mem=${max_memory}M
+  #SBATCH -o ${out_dir}${clusterer}/${dataset}/%A-%a.out
+  #SBATCH -e ${out_dir}${clusterer}/${dataset}/%A-%a.err
 
-      module add python/anaconda/2019.10/3.7
-      source /gpfs/software/ada/python/anaconda/2019.10/3.7/etc/profile.d/conda.sh
-      conda activate $env_name
-      export PYTHONPATH=$(pwd)
+  . /etc/profile
 
-      python ${script_file_path} ${data_dir} ${results_dir} ${distance} ${dataset} \$SLURM_ARRAY_TASK_ID ${generate_train_files} ${clusterer} ${averaging}"  > generatedFile.sub
-      echo ${count} ${clusterer}/${dataset}
+  module add python/anaconda/2019.10/3.7
+  source /gpfs/software/ada/python/anaconda/2019.10/3.7/etc/profile.d/conda.sh
+  conda activate $env_name
+  export PYTHONPATH=$(pwd)
 
-      sbatch < generatedFile.sub --qos=ht
-    fi
-  done
+  python ${script_file_path} ${data_dir} ${results_dir} ${distance} ${dataset} \$SLURM_ARRAY_TASK_ID ${generate_train_files} ${clusterer} ${averaging}"  > generatedFile.sub
+  echo ${count} ${clusterer}/${dataset}
+
+  sbatch < generatedFile.sub --qos=ht
+fi
+done
 done < ${datasets}
 
 echo Finished submitting jobs
