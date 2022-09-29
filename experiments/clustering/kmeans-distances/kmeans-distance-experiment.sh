@@ -35,7 +35,7 @@ starting_dataset='ElectricDevices'
 found_starting_dataset=false
 # dtw ddtw erp edr wdtw lcss twe msm dwdtw euclidean
 while read dataset; do
-if [ ["$dataset" == "starting_dataset"] ]; then
+if [ ["$dataset" == "$starting_dataset"] ]; then
 found_starting_dataset=true
 continue
 fi
