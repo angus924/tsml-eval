@@ -20,7 +20,7 @@ data_dir="/gpfs/home/ajb/Data/"
 data_dir="/gpfs/home/ajb/Data/"
 #dont write results to my file space, it causes problems
 my_path="/gpfs/home/${username}"
-datasets="${my_path}/code/estimator-evaluation/experiments/Univariate.txt"
+datasets="${my_path}/code/estimator-evaluation/experiments/clustering/kmeans-distances/Univariate.txt"
 results_dir="${my_path}/experiment-results/${experiment_name}/"
 out_dir="${my_path}/experiment-logs/${experiment_name}/"
 script_file_path="${my_path}/code/estimator-evaluation/sktime_estimator_evaluation/experiments/clustering_experiments.py"
@@ -30,20 +30,8 @@ generate_train_files="false"
 clusterer="kmeans"
 averaging="mean"
 count=0
-#starting_dataset='ACSF1'
-starting_dataset='ElectricDevices'
-found_starting_dataset=false
 # dtw ddtw erp edr wdtw lcss twe msm dwdtw euclidean
 while read dataset; do
-if [ ["$dataset" == "$starting_dataset"] ]; then
-found_starting_dataset=true
-continue
-fi
-if [ ["$found_starting_dataset" == false] ]; then
-echo "Skipping $dataset as already got results for."
-continue
-fi
-
 for distance in euclidean
 do
 
