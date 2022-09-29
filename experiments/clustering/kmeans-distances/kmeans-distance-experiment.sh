@@ -1,7 +1,7 @@
 #!/bin/bash
 experiment_name="kmeans-distance-experiment"
-max_folds=1
-start_fold=1
+max_folds=30
+start_fold=2
 # To avoid dumping 1000s of jobs in the queue we have a higher level queue
 maxNumSubmitted=700
 # queue options are https://my.uea.ac.uk/divisions/it-and-computing-services/service-catalogue/research-it-services/hpc/ada-cluster/using-ada
