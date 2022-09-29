@@ -30,8 +30,20 @@ generate_train_files="false"
 clusterer="kmeans"
 averaging="mean"
 count=0
+#starting_dataset='ACSF1'
+starting_dataset='ECGFiveDays'
+found_starting_dataset=false
 # dtw ddtw erp edr wdtw lcss twe msm dwdtw euclidean
 while read dataset; do
+if [ ["$dataset" == "starting_dataset"] ]; then
+found_starting_dataset=true
+fi
+if [ ["$found_starting_dataset" == false] ]; then
+  echo "Skipping $dataset as already got results for."
+continue
+fi
+
+fi
 for distance in euclidean
 do
 
