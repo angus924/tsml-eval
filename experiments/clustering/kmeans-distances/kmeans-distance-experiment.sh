@@ -44,7 +44,6 @@ echo "Skipping $dataset as already got results for."
 continue
 fi
 
-fi
 for distance in euclidean
 do
 
