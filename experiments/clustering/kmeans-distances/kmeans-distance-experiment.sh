@@ -1,8 +1,6 @@
 #!/bin/bash
-experiment_name='kmeans-distance-experiment'
-env_name=$experiment_name
-
-max_folds=30
+experiment_name="kmeans-distance-experiment"
+max_folds=1
 start_fold=1
 # To avoid dumping 1000s of jobs in the queue we have a higher level queue
 maxNumSubmitted=700
@@ -19,15 +17,15 @@ start_point=1
 data_dir="/gpfs/home/ajb/Data/"
 # Tony's work space, all should be able to read these.
 # Change if you want to use different data or lists
-local_path="/gpfs/home/ajb/"
-data_dir=$local_path"Data/"
+data_dir="/gpfs/home/ajb/Data/"
 #dont write results to my file space, it causes problems
-my_path="/gpfs/home/eej17ucu/"
-datasets=$my_path"code/estimator-evaluation/experiments/Univariate.txt"
-results_dir=$my_path"experiment-results/"$experiment_name"/"
-out_dir=$my_path"experiment-logs/"$experiment_name"/"
-script_file_path=$my_path"code/estimator-evaluation/sktime_estimator_evaluation/experiments/clustering_experiments.py"
+my_path="/gpfs/home/${username}"
+datasets="${my_path}/code/estimator-evaluation/experiments/Univariate.txt"
+results_dir="${my_path}/experiment-results/${experiment_name}/"
+out_dir="${my_path}/experiment-logs/${experiment_name}/"
+script_file_path="${my_path}/code/estimator-evaluation/sktime_estimator_evaluation/experiments/clustering_experiments.py"
 # For env set up, see https://hackmd.io/ds5IEK3oQAquD4c6AP2xzQ
+env_name="${experiment_name}"
 generate_train_files="false"
 clusterer="kmeans"
 averaging="mean"
@@ -36,12 +34,13 @@ count=0
 while read dataset; do
 for distance in euclidean
 do
+
 numPending=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "PD ${queue}" | wc -l)
 numRunning=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "R ${queue}" | wc -l)
 while [ "$((numPending+numRunning))" -ge "${maxNumSubmitted}" ]
 do
-    echo Waiting 30s, $((numPending+numRunning)) currently submitted on ${queue}, user-defined max is ${maxNumSubmitted}
-	sleep 30
+    echo Waiting 60s, $((numPending+numRunning)) currently submitted on ${queue}, user-defined max is ${maxNumSubmitted}
+	sleep 60
 	numPending=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "PD ${queue}" | wc -l)
 	numRunning=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "R ${queue}" | wc -l)
 done
@@ -50,30 +49,43 @@ done
 
 if ((count>=start_point)); then
 
-  mkdir -p ${out_dir}${clusterer}/${dataset}/
-  echo "#!/bin/bash
-  #SBATCH --mail-type=${mail}
-  #SBATCH --mail-user=${mailto}
-  #SBATCH -p ${queue}
-  #SBATCH -t ${max_time}
-  #SBATCH --job-name=${clusterer}${dataset}
-  #SBATCH --array=${start_fold}-${max_folds}
-  #SBATCH --mem=${max_memory}M
-  #SBATCH -o ${out_dir}${clusterer}/${dataset}/%A-%a.out
-  #SBATCH -e ${out_dir}${clusterer}/${dataset}/%A-%a.err
+mkdir -p ${out_dir}${clusterer}/${dataset}/
 
-  . /etc/profile
+echo "#!/bin/bash
 
-  module add python/anaconda/2019.10/3.7
-  source /gpfs/software/ada/python/anaconda/2019.10/3.7/etc/profile.d/conda.sh
-  conda activate $env_name
-  export PYTHONPATH=$(pwd)
+#SBATCH --mail-type=${mail}
+#SBATCH --mail-user=${mailto}
+#SBATCH -p ${queue}
+#SBATCH -t ${max_time}
+#SBATCH --job-name=${clusterer}${dataset}
+#SBATCH --array=${start_fold}-${max_folds}
+#SBATCH --mem=${max_memory}M
+#SBATCH -o ${out_dir}${clusterer}/${dataset}/%A-%a.out
+#SBATCH -e ${out_dir}${clusterer}/${dataset}/%A-%a.err
 
-  python ${script_file_path} ${data_dir} ${results_dir} ${distance} ${dataset} \$SLURM_ARRAY_TASK_ID ${generate_train_files} ${clusterer} ${averaging}"  > generatedFile.sub
-  echo ${count} ${clusterer}/${dataset}
+. /etc/profile
 
-  sbatch < generatedFile.sub --qos=ht
+module add python/anaconda/2019.10/3.7
+source /gpfs/software/ada/python/anaconda/2019.10/3.7/etc/profile.d/conda.sh
+conda activate $env_name
+export PYTHONPATH=$(pwd)
+
+python ${script_file_path} ${data_dir} ${results_dir} ${distance} ${dataset} \$SLURM_ARRAY_TASK_ID ${generate_train_files} ${clusterer} ${averaging}"  > generatedFile.sub
+#                         data_dir = sys.argv[1]
+#                         results_dir = sys.argv[2]
+#                         distance = sys.argv[3]
+#                         dataset = sys.argv[4]
+#                         resample = int(sys.argv[5]) - 1
+#                         generate_train_files = sys.argv[6]
+#                         clusterer = sys.argv[7]
+#                         averaging = sys.argv[8]
+
+echo ${count} ${clusterer}/${dataset}
+
+sbatch < generatedFile.sub --qos=ht
+
 fi
+
 done
 done < ${datasets}
 
