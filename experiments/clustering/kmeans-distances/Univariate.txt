@@ -1,8 +1,3 @@
-ElectricDevices
-EOGHorizontalSignal
-EOGVerticalSignal
-EthanolLevel
-FaceAll
 FaceFour
 FacesUCR
 FiftyWords
