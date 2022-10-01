@@ -1,7 +1,7 @@
 #!/bin/bash
 experiment_name="kmeans-distance-experiment"
 max_folds=30
-start_fold=2
+start_fold=1
 # To avoid dumping 1000s of jobs in the queue we have a higher level queue
 maxNumSubmitted=700
 # queue options are https://my.uea.ac.uk/divisions/it-and-computing-services/service-catalogue/research-it-services/hpc/ada-cluster/using-ada
@@ -30,9 +30,11 @@ generate_train_files="false"
 clusterer="kmeans"
 averaging="mean"
 count=0
-# dtw ddtw erp edr wdtw lcss twe msm dwdtw euclidean
+# done euclidean
+# in progress dtw
+# todo ddtw erp edr wdtw lcss twe msm dwdtw euclidean
 while read dataset; do
-for distance in euclidean
+for distance in dtw
 do
 
 numPending=$(squeue -u ${username} --format="%10i %15P %20j %10u %10t %10M %10D %20R" -r | awk '{print $5, $2}' | grep "PD ${queue}" | wc -l)
