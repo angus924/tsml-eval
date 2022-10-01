@@ -1,12 +1,3 @@
-ECG5000
-ECGFiveDays
-ElectricDevices
-EOGHorizontalSignal
-EOGVerticalSignal
-EthanolLevel
-FaceAll
-FaceFour
-FacesUCR
 FiftyWords
 Fish
 FordA
