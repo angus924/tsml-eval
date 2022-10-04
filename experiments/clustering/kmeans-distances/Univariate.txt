@@ -1,7 +1,3 @@
-GunPoint
-GunPointAgeSpan
-GunPointMaleVersusFemale
-GunPointOldVersusYoung
 Ham
 HandOutlines
 Haptics
