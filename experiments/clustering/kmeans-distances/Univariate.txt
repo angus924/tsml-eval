@@ -1,9 +1,3 @@
-Ham
-HandOutlines
-Haptics
-Herring
-HouseTwenty
-InlineSkate
 InsectEPGRegularTrain
 InsectEPGSmallTrain
 InsectWingbeatSound
