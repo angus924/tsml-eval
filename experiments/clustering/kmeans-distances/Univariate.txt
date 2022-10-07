@@ -1,5 +1,3 @@
-InsectEPGRegularTrain
-InsectEPGSmallTrain
 InsectWingbeatSound
 ItalyPowerDemand
 LargeKitchenAppliances
